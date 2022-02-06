@@ -9,6 +9,7 @@ interface Props {
   activities: Activity[];
   selectedActivity: Activity | undefined;
   editMode: boolean;
+  submitting: boolean;
   onSelectActivity: (id: string) => void;
   onCancelSelectActivity: () => void;
   onOpenForm: (id: string) => void;
@@ -18,7 +19,7 @@ interface Props {
 };
 
 function AcivityDashboard({
-    activities, selectedActivity, editMode, 
+    activities, selectedActivity, editMode, submitting,
     onSelectActivity, onCancelSelectActivity, onOpenForm, onCloseForm, onCreateOrEditActivity, onDeleteActivity
   }: Props) {
   return (    
@@ -26,6 +27,7 @@ function AcivityDashboard({
       <Grid.Column width="10">
         <ActivityList 
           activities={activities} 
+          submitting={submitting}
           onSelectActivity={onSelectActivity}     
           onDeleteActivity={onDeleteActivity}     
         />
@@ -39,6 +41,7 @@ function AcivityDashboard({
         { editMode &&
         <ActivityForm 
           activity={selectedActivity}
+          submitting={submitting}
           onCloseForm={onCloseForm}
           onCreateOrEditActivity={onCreateOrEditActivity}
         />}
