@@ -3,6 +3,7 @@ import { Grid } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from "../../../app/stores/store";
 import ActivityList from "./ActivityList";
+import ActivityFilters from "./ActivityFilters";
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 
 function AcivityDashboard() {
@@ -29,7 +30,7 @@ function AcivityDashboard() {
         <ActivityList />
       </Grid.Column>      
       <Grid.Column width="6">
-        <h2>Activity Filters</h2>
+        <ActivityFilters />
       </Grid.Column>
     </Grid>
   );

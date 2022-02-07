@@ -3,6 +3,8 @@ import { makeAutoObservable, runInAction } from "mobx";
 import {v4 as uuid} from "uuid";
 import agent from "../api/agent";
 
+type ActivityGroups = {[key:string]: Activity[]};
+
 export default class ActivityStore {
   //public activities: Activity[] = [];
   public activityRegistry: Map<string,Activity> = new Map<string,Activity>();
@@ -18,6 +20,20 @@ export default class ActivityStore {
   public get activitiesByDate() : Activity[] {
     return Array.from(this.activityRegistry.values()).sort((a,b) => 
       Date.parse(a.date) - Date.parse(b.date));
+  }
+
+  public get groupedActivities() {
+    return Object.entries(
+      this.activitiesByDate.reduce<ActivityGroups>( (activities, activity) => {
+        const dt = activity.date;
+        activities.hasOwnProperty(dt) 
+          ? activities[dt].push(activity)
+          : activities[dt] = [activity];
+        return activities;  
+      },{}) 
+    ).sort((a,b)=> 
+      Date.parse(a[0]) - Date.parse(b[0])
+    );
   }
 
   public loadActivities = async () => {
