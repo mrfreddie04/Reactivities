@@ -1,14 +1,12 @@
 import React from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
-import { Activity } from "../../../app/models/activity";
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-  activity: Activity;
-  onOpenForm: (id: string) => void;
-  onCancelSelectActivity: () => void;
-};
+function AcivityDetails() {
+  const { activityStore: { setOpenForm, cancelSelectedActivity, selectedActivity: activity} } = useStore();
 
-function AcivityDetails({activity, onCancelSelectActivity, onOpenForm}: Props) {
+  console.log("Details render");
+
   if(!activity)
     return null;
 
@@ -26,8 +24,8 @@ function AcivityDetails({activity, onCancelSelectActivity, onOpenForm}: Props) {
       </Card.Content>
       <Card.Content extra>
         <Button.Group widths="2">
-          <Button basic color='blue' content="Edit" onClick={() => onOpenForm(activity.id)}></Button>
-          <Button basic color='grey' content="Cancel" onClick={onCancelSelectActivity}></Button>
+          <Button basic color='blue' content="Edit" onClick={() => setOpenForm(activity.id)}></Button>
+          <Button basic color='grey' content="Cancel" onClick={cancelSelectedActivity}></Button>
         </Button.Group>
       </Card.Content>
     </Card>

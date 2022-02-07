@@ -1,33 +1,31 @@
 import React, {useState, useEffect, SyntheticEvent} from 'react';
 import { Segment, Item, Button, Label } from 'semantic-ui-react';
-import { Activity } from "../../../app/models/activity";
+import { observer } from 'mobx-react-lite';
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-  activities: Activity[];
-  submitting: boolean;
-  onSelectActivity: (id:string)=>void;
-  onDeleteActivity: (id:string)=>void;
-};
+function AcivityList() {
 
-function AcivityList({activities, submitting, onSelectActivity, onDeleteActivity}: Props) {
+  const { activityStore: {activitiesByDate, loading, deleteActivity, setSelectedActivity} } = useStore();
 
   const [target, setTarget] = useState("");
 
   useEffect(()=>{
-    if(!submitting)
+    if(!loading)
       setTarget("");
-  },[submitting]);
+  },[loading]);
 
   const handleActivityDelete = (e: SyntheticEvent<HTMLButtonElement>,id: string) => {
     //setTarget(e.currentTarget.name);
     setTarget(id);
-    onDeleteActivity(id);
+    deleteActivity(id);
   }
+
+  console.log("List render");
 
   return (    
     <Segment>
       <Item.Group divided>
-        {activities.map( activity => {
+        {activitiesByDate.map( activity => {
           return (
             <Item key={activity.id}>
               <Item.Content>
@@ -39,7 +37,7 @@ function AcivityList({activities, submitting, onSelectActivity, onDeleteActivity
                 </Item.Description>                
                 <Item.Extra>
                   <Button floated='right' color="blue" content="View" 
-                    onClick={() => onSelectActivity(activity.id)}>
+                    onClick={() => setSelectedActivity(activity.id)}>
                   </Button>
                   <Button 
                     floated='right' 
@@ -47,7 +45,7 @@ function AcivityList({activities, submitting, onSelectActivity, onDeleteActivity
                     content="Delete" 
                     name={activity.id}
                     onClick={(e) => handleActivityDelete(e, activity.id)}
-                    loading={submitting && target === activity.id}
+                    loading={loading && target === activity.id}
                   />
                   <Label basic content={activity.category}></Label>
                 </Item.Extra>
@@ -60,4 +58,4 @@ function AcivityList({activities, submitting, onSelectActivity, onDeleteActivity
   );
 }
 
-export default AcivityList;
+export default observer(AcivityList);

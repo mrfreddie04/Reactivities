@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { Button, Form, Segment } from 'semantic-ui-react';
-import { Activity } from "../../../app/models/activity";
+import { observer } from 'mobx-react-lite';
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-  activity: Activity | undefined;
-  submitting: boolean;
-  onCloseForm: () => void;
-  onCreateOrEditActivity: (activity: Activity) => void;
-};
+function AcivityForm() {
 
-function AcivityForm({activity: initialActivity, submitting, onCloseForm, onCreateOrEditActivity}: Props) {
+  const { activityStore: {selectedActivity, loading, setCloseForm, createActivity, updateActivity } } = useStore();
 
-  const initialState = initialActivity ?? {
+  const initialState = selectedActivity ?? {
     id: "",
     title: "",
     category: "",
@@ -25,8 +21,8 @@ function AcivityForm({activity: initialActivity, submitting, onCloseForm, onCrea
   //console.log("Render", activity, initialState);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onCreateOrEditActivity(activity);
+    e.preventDefault();    
+    activity.id ? updateActivity(activity) : createActivity(activity); 
     //console.log("Activity",activity);
   }
 
@@ -44,11 +40,11 @@ function AcivityForm({activity: initialActivity, submitting, onCloseForm, onCrea
         <Form.Input type="date" placeholder="Date" value={activity.date} name="date"></Form.Input>
         <Form.Input placeholder="City" value={activity.city} name="city"></Form.Input>
         <Form.Input placeholder="Venue" value={activity.venue} name="venue"></Form.Input>
-        <Button loading={submitting} floated="right" positive content="Submit" type="submit"></Button>
-        <Button floated="right" content="Cancel" type="button" onClick={onCloseForm}></Button>
+        <Button loading={loading} floated="right" positive content="Submit" type="submit"></Button>
+        <Button floated="right" content="Cancel" type="button" onClick={setCloseForm}></Button>
       </Form>
     </Segment>
   );
 }
 
-export default AcivityForm;
+export default observer(AcivityForm);
