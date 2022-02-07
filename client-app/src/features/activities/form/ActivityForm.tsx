@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Segment } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from "../../../app/stores/store";
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { Activity } from '../../../app/models/activity';
+import LoadingComponent from '../../../app/layout/LoadingComponent';
 
 function AcivityForm() {
+  const history = useHistory();
+  const { activityStore: {loadingInitial, loading, loadActivity, createActivity, updateActivity } } = useStore();
+  const { id } = useParams<{id:string}>();
 
-  const { activityStore: {selectedActivity, loading, setCloseForm, createActivity, updateActivity } } = useStore();
-
-  const initialState = selectedActivity ?? {
+  const [activity, setActivity] = useState<Activity>({
     id: "",
     title: "",
     category: "",
@@ -15,21 +19,41 @@ function AcivityForm() {
     date: "",
     city: "",
     venue: ""
-  };
+  });
 
-  const [activity, setActivity] = useState(initialState);
-  //console.log("Render", activity, initialState);
+  useEffect(() => {
+    if(id) {
+      loadActivity(id).then((activity)=>{
+        if(activity) setActivity(activity);
+      });
+    }
+  },[id, loadActivity]);
+
+  if(loadingInitial)
+    return (
+      <LoadingComponent content="Loading activity..."></LoadingComponent>
+    );  
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();    
-    activity.id ? updateActivity(activity) : createActivity(activity); 
-    //console.log("Activity",activity);
+  
+    if(!activity.id) {
+      createActivity(activity).then((activity) => history.push(`/activities/${activity!.id}`)); 
+    } else {
+      updateActivity(activity).then(() => history.push(`/activities/${activity.id}`)); 
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setActivity({...activity,[name]:value})
   }
+
+  const handleCancel = () => {
+    return activity.id ? `/activities/${activity.id}` : "/activities";
+  } 
+
+  console.log("Form render");
 
   return (    
     <Segment clearing>
@@ -41,7 +65,9 @@ function AcivityForm() {
         <Form.Input placeholder="City" value={activity.city} name="city"></Form.Input>
         <Form.Input placeholder="Venue" value={activity.venue} name="venue"></Form.Input>
         <Button loading={loading} floated="right" positive content="Submit" type="submit"></Button>
-        <Button floated="right" content="Cancel" type="button" onClick={setCloseForm}></Button>
+        <Button as={Link} to={handleCancel()}
+          floated="right" content="Cancel" type="button"
+        ></Button>
       </Form>
     </Segment>
   );

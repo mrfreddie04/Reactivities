@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Grid } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from "../../../app/stores/store";
 import ActivityList from "./ActivityList";
-import ActivityDetails from "../details/ActivityDetails";
-import ActivityForm from "../form/ActivityForm";
+import LoadingComponent from '../../../app/layout/LoadingComponent';
 
 function AcivityDashboard() {
 
-  const { activityStore: { selectedActivity, editMode } } = useStore();
+  const { activityStore: { loadingInitial, activityRegistry, loadActivities } } = useStore();
+
+  useEffect(() => {
+    if(activityRegistry.size <= 1) {
+      console.log("loadActivities");
+      loadActivities();  
+    }
+  },[loadActivities,activityRegistry.size]);
+
+  if(loadingInitial)
+    return (
+      <LoadingComponent content="Loading app..."></LoadingComponent>
+    );  
 
   console.log("Dashboard render");
 
@@ -18,10 +29,7 @@ function AcivityDashboard() {
         <ActivityList />
       </Grid.Column>      
       <Grid.Column width="6">
-        { selectedActivity && !editMode && 
-          <ActivityDetails />}  
-        { editMode &&
-          <ActivityForm/>}
+        <h2>Activity Filters</h2>
       </Grid.Column>
     </Grid>
   );
