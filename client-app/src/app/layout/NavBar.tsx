@@ -12,8 +12,9 @@ function NavBar() {
             Reactivities
           </Menu.Item>
 
-          <Menu.Item as={NavLink} to="/activities" exact name='Activities'>
-          </Menu.Item>
+          <Menu.Item as={NavLink} to="/activities" exact name='Activities' />
+
+          <Menu.Item as={NavLink} to="/errors" exact name='Test Errors' />
             
           <Menu.Item >
             <Button as={NavLink} to="/create-activity" exact 
