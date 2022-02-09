@@ -5,13 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Activities;
 using Domain;
 using System.Threading;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
   public class ActivitiesController: BaseApiController
   {
 
-    [HttpGet()]
+    [HttpGet]
     public async Task<IActionResult> GetActivities()
     {
       return HandleResult(await Mediator.Send(new List.Query()));
