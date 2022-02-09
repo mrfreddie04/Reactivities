@@ -2,6 +2,7 @@ import { Activity } from '../models/activity';
 import { makeAutoObservable, runInAction } from "mobx";
 import {v4 as uuid} from "uuid";
 import agent from "../api/agent";
+import { format } from 'date-fns';
 
 type ActivityGroups = {[key:string]: Activity[]};
 
@@ -11,7 +12,7 @@ export default class ActivityStore {
   public selectedActivity: Activity | undefined = undefined;  
   public editMode: boolean = false;
   public loading: boolean = false;
-  public loadingInitial: boolean = true;
+  public loadingInitial: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -19,13 +20,13 @@ export default class ActivityStore {
 
   public get activitiesByDate() : Activity[] {
     return Array.from(this.activityRegistry.values()).sort((a,b) => 
-      Date.parse(a.date) - Date.parse(b.date));
+      a.date!.getTime() - b.date!.getTime());
   }
 
   public get groupedActivities() {
     return Object.entries(
       this.activitiesByDate.reduce<ActivityGroups>( (activities, activity) => {
-        const dt = activity.date;
+        const dt = format(activity.date!,"dd MMM yyyy");//!.toISOString().split("T");
         activities.hasOwnProperty(dt) 
           ? activities[dt].push(activity)
           : activities[dt] = [activity];
@@ -100,7 +101,7 @@ export default class ActivityStore {
     }       
   }  
   
-  public setLoadingInitial = (state: boolean) => {
+  private setLoadingInitial = (state: boolean) => {
     this.loadingInitial = state;
   }
 
@@ -174,8 +175,8 @@ export default class ActivityStore {
   }  
 
   private setActivity = (activity: Activity) => {
-    const [dt] = activity.date.split("T");
-    activity.date = dt;
+    //const [dt] = activity.date.split("T");
+    activity.date = new Date(activity.date!);
     this.activityRegistry.set(activity.id, activity);
   }  
 

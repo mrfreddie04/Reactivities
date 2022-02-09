@@ -12,7 +12,7 @@ function AcivityDashboard() {
 
   useEffect(() => {
     if(activityRegistry.size <= 1) {
-      console.log("loadActivities");
+      //console.log("loadActivities");
       loadActivities();  
     }
   },[loadActivities,activityRegistry.size]);
@@ -22,7 +22,7 @@ function AcivityDashboard() {
       <LoadingComponent content="Loading app..."></LoadingComponent>
     );  
 
-  console.log("Dashboard render");
+  //console.log("Dashboard render");
 
   return (    
     <Grid columns={1}>

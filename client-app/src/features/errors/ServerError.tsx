@@ -7,7 +7,7 @@ function ServerError() {
 
   const { commonStore: {error } } = useStore();
 
-  console.log("ServerError render");
+  //console.log("ServerError render");
 
   return (        
     <Container>

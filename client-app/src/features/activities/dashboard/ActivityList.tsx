@@ -8,7 +8,7 @@ function AcivityList() {
 
   const { activityStore: {groupedActivities } } = useStore();
 
-  console.log("List render");
+  //console.log("List render");
 
   return (        
     <Fragment>

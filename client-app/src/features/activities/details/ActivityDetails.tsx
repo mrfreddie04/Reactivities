@@ -16,7 +16,7 @@ function AcivityDetails() {
 
   useEffect(()=>{
     if(id) {
-      console.log("loadActivity");
+      //console.log("loadActivity");
       loadActivity(id);
     }
   },[loadActivity, id]);
@@ -29,7 +29,7 @@ function AcivityDetails() {
   if(!activity)
     return null;
 
-  console.log("Details render");    
+  //console.log("Details render");    
 
   return (    
     <Grid>

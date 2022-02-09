@@ -16,7 +16,7 @@ import ServerError from '../../features/errors/ServerError';
 function App() {
   const location = useLocation();
 
-  console.log("App render");
+  //console.log("App render");
 
   return (
     <Fragment>
