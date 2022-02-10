@@ -58,16 +58,22 @@ namespace API.Controllers
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register([FromBody] RegisterDto registerDto)
     {
-      if(await _userManager.Users.AnyAsync( user => user.Email == registerDto.Email))
-        return BadRequest("Email taken");
+      if(await _userManager.Users.AnyAsync( user => user.Email == registerDto.Email)) 
+      {
+        ModelState.AddModelError("email","Email taken");
+        return ValidationProblem();
+      }
 
-      if(await _userManager.Users.AnyAsync( user => user.UserName == registerDto.UserName))
-        return BadRequest("UserName taken");        
+      if(await _userManager.Users.AnyAsync( user => user.UserName == registerDto.Username))
+      {
+        ModelState.AddModelError("username","Username taken");
+        return ValidationProblem();     
+      }     
       
       var user = new AppUser() {
         Email = registerDto.Email,
         DisplayName = registerDto.DisplayName,
-        UserName = registerDto.UserName
+        UserName = registerDto.Username
       };
 
       var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -94,7 +100,7 @@ namespace API.Controllers
     {
       return new UserDto(){
           DisplayName = user.DisplayName,
-          UserName = user.UserName,
+          Username = user.UserName,
           Token = _tokenService.CreateToken(user),
           Image = null
       };

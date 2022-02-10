@@ -19,7 +19,7 @@ function AcivityDashboard() {
 
   if(loadingInitial)
     return (
-      <LoadingComponent content="Loading app..."></LoadingComponent>
+      <LoadingComponent content="Loading ativities..."></LoadingComponent>
     );  
 
   //console.log("Dashboard render");
