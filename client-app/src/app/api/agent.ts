@@ -26,22 +26,11 @@ axios.interceptors.request.use( config => {
 axios.interceptors.response.use( async response => {
   await sleep(1000);
   return response;
-  // return sleep(1000)
-  //   .then(()=>response)
-  //   .catch((err)=>{
-  //     console.log(err);
-  //     return Promise.reject(err);
-  //   }
-  // );
 }, (error: AxiosError) => {
   const { data, status, config } = error.response!;
 
   switch (status) {
     case 400: 
-      // if(typeof data === "string") {
-      //   toast.error(data);
-      // }
-      // else 
       if(config.method === "get" && data.errors && data.errors.hasOwnProperty("id")) {
         history.push("/not-found");
       } else if(data.errors) {

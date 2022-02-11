@@ -6,6 +6,8 @@ using MediatR;
 using Application.Activities;
 using Application.Core;
 using Persistence;
+using Application.Interfaces;
+using Infrastructure.Security;
 
 namespace API.Extensions
 {
@@ -33,6 +35,8 @@ namespace API.Extensions
             
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+
+            services.AddScoped<IUserAccessor, UserAccessor>();
 
             return services;
         }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -10,9 +11,10 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220211025638_AddCancelledPropertyToActivity")]
+    partial class AddCancelledPropertyToActivity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
@@ -51,18 +53,18 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.ActivityAttendee", b =>
                 {
-                    b.Property<string>("AppUserId")
+                    b.Property<Guid>("ActivityId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ActivityId")
+                    b.Property<string>("AppUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsHost")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("AppUserId", "ActivityId");
+                    b.HasKey("ActivityId", "AppUserId");
 
-                    b.HasIndex("ActivityId");
+                    b.HasIndex("AppUserId");
 
                     b.ToTable("ActivityAttendees");
                 });
