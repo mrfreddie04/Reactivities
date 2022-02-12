@@ -1,9 +1,10 @@
 import React from 'react';
-import { Segment, Item, Button, Icon } from 'semantic-ui-react';
+import { Segment, Item, Button, Icon, Label } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Activity } from '../../../app/models/activity';
+import ActivityListItemAttendees from "./ActivityListItemAttendees";
 
 interface Props {
   activity: Activity;
@@ -14,16 +15,33 @@ function AcivityListItem({ activity }: Props) {
   return (    
     <Segment.Group>
       <Segment>
+        {activity.isCancelled && 
+          <Label style={{textAlign:"center"}}
+            attached="top"
+            color="red" 
+            content="Cancelled"
+          ></Label>
+        }        
         <Item.Group>
           <Item>
-            <Item.Image size="tiny" circular src="/assets/user.png"/>
+            <Item.Image size="tiny" circular src="/assets/user.png" style={{marginBottom: "5px"}}/>
             <Item.Content>
               <Item.Header as={Link} to={`/activities/${activity.id}`}>
                 {activity.title}
               </Item.Header>
               <Item.Description>
-                Hosted by Bob
+                Hosted by {activity.host?.displayName}
               </Item.Description>
+              {activity.isHost && (
+                <Item.Description>
+                  <Label basic color="orange">You are hosting this event</Label>
+                </Item.Description>
+              )}
+              {!activity.isHost && activity.isGoing && (
+                <Item.Description>
+                  <Label basic color="green">You are going to this event</Label>
+                </Item.Description>
+              )}              
             </Item.Content>
           </Item>
         </Item.Group>
@@ -35,7 +53,7 @@ function AcivityListItem({ activity }: Props) {
         </span>
       </Segment>
       <Segment secondary>
-        Attendees go here
+        <ActivityListItemAttendees attendees={activity.attendees || []}/>
       </Segment>
       <Segment clearing>
         <span>{activity.description}</span>

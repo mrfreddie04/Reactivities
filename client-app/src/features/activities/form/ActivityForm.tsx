@@ -6,7 +6,7 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { categoryOptions } from "../../../app/common/options/categoryOptions";
 import { useStore } from "../../../app/stores/store";
-import { Activity } from '../../../app/models/activity';
+import { ActivityFormValues } from '../../../app/models/activity';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 import MyTextInput from "../../../app/common/form/MyTextInput";
 import MyTextArea from "../../../app/common/form/MyTextArea";
@@ -15,18 +15,10 @@ import MyDateInput from "../../../app/common/form/MyDateInput";
 
 function AcivityForm() {
   const history = useHistory();
-  const { activityStore: {loadingInitial, loading, loadActivity, createActivity, updateActivity } } = useStore();
+  const { activityStore: {loadingInitial, loadActivity, createActivity, updateActivity } } = useStore();
   const { id } = useParams<{id:string}>();
 
-  const [activity, setActivity] = useState<Activity>({
-    id: "",
-    title: "",
-    category: "",
-    description: "",
-    date: null,
-    city: "",
-    venue: ""
-  });
+  const [activity, setActivity] = useState<ActivityFormValues>(new ActivityFormValues());
 
   //use Yup to create validation schema
   const validationSchema = Yup.object({
@@ -42,7 +34,7 @@ function AcivityForm() {
     if(id) {
       loadActivity(id).then((activity)=>{
         if(activity) {
-          setActivity(activity);
+          setActivity(new ActivityFormValues(activity));
         }  
       });
     }
@@ -53,9 +45,9 @@ function AcivityForm() {
       <LoadingComponent content="Loading activity..."></LoadingComponent>
     );  
 
-  const handleFormSubmit = (activity: Activity) => {  
+  const handleFormSubmit = (activity: ActivityFormValues) => {  
     if(!activity.id) {
-      createActivity(activity).then((activity) => history.push(`/activities/${activity!.id}`)); 
+      createActivity(activity).then((id) => history.push(`/activities/${id}`)); 
     } else {
       updateActivity(activity).then(() => history.push(`/activities/${activity.id}`)); 
     }
@@ -97,7 +89,7 @@ function AcivityForm() {
             <MyTextInput placeholder="City" name="city"  />
             <MyTextInput placeholder="Venue"  name="venue" />
             <Button 
-              loading={loading} 
+              loading={isSubmitting} 
               disabled={!isValid || isSubmitting || !dirty} 
               floated="right" 
               positive 
