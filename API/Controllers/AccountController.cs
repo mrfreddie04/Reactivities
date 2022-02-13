@@ -41,7 +41,8 @@ namespace API.Controllers
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login([FromBody] LoginDto loginDto) 
     {
-      var user = await _userManager.FindByEmailAsync(loginDto.Email);
+      //var user = await _userManager.FindByEmailAsync(loginDto.Email);
+      var user = await _userManager.Users.Include(u => u.Photos).FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
       if(user == null) return Unauthorized();
 
@@ -91,7 +92,7 @@ namespace API.Controllers
       //We have access here to User property which is ClaimsPrincipal for the user associated with the executing action
       //We have acces to claims (Email, Id, UserName)
       var email = User.FindFirstValue(ClaimTypes.Email);
-      var user = await _userManager.FindByEmailAsync(email);
+      var user = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Email == email);
 
       return Ok(CreateUserObject(user));      
     }
@@ -99,10 +100,10 @@ namespace API.Controllers
     private UserDto CreateUserObject(AppUser user)
     {
       return new UserDto(){
-          DisplayName = user.DisplayName,
-          Username = user.UserName,
-          Token = _tokenService.CreateToken(user),
-          Image = null
+        DisplayName = user.DisplayName,
+        Username = user.UserName,
+        Token = _tokenService.CreateToken(user),
+        Image = user.Photos.FirstOrDefault( p => p.IsMain)?.Url
       };
     }
   }

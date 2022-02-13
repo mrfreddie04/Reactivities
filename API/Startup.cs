@@ -9,6 +9,7 @@ using Application.Activities;
 using API.Middleware;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using System.Text.Json.Serialization;
 
 namespace API
 {
@@ -30,6 +31,10 @@ namespace API
                 opt.Filters.Add(new AuthorizeFilter(policy));
             }).AddFluentValidation( config => {
                 config.RegisterValidatorsFromAssemblyContaining<Create>();
+            }).AddJsonOptions(opt => 
+            {
+                opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                opt.JsonSerializerOptions.WriteIndented = true;
             });
 
             services.AddApplicationServices(_config);

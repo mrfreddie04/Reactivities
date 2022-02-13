@@ -1,5 +1,6 @@
 using System.Linq;
 using Application.Activities;
+using Application.Photos;
 using AutoMapper;
 using Domain;
 
@@ -16,7 +17,7 @@ namespace Application.Core
           dest => dest.HostUsername, 
           opt => opt.MapFrom(src => src.Attendees.FirstOrDefault(att => att.IsHost).AppUser.UserName));
 
-      CreateMap<ActivityAttendee,Application.Profiles.Profile>()
+      CreateMap<ActivityAttendee, AttendeeDto>()
         .ForMember(
           dest => dest.Username,
           opt => opt.MapFrom(src => src.AppUser.UserName))
@@ -28,7 +29,18 @@ namespace Application.Core
           opt => opt.MapFrom(src => src.AppUser.Bio))
         .ForMember(
           dest => dest.Image,
-          opt => opt.Ignore());                              
+          opt => opt.MapFrom(src => src.AppUser.Photos.FirstOrDefault(p => p.IsMain).Url));   
+
+      CreateMap<Photo, PhotoDto>();
+
+      CreateMap<AppUser, Application.Profiles.Profile>()
+        .ForMember(
+          dest => dest.Image,
+          opt => opt.MapFrom(src => src.Photos.FirstOrDefault(p => p.IsMain).Url))      
+        .ForMember(
+          dest => dest.Username,
+          opt => opt.MapFrom(src => src.UserName));
+
     }
   }
 }

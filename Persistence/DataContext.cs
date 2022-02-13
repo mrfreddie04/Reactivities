@@ -12,6 +12,7 @@ namespace Persistence
 
     public DbSet<Activity> Activities { get; set; }
     public DbSet<ActivityAttendee> ActivityAttendees { get; set; }
+    public DbSet<Photo> Photos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder) 
     {
@@ -33,7 +34,23 @@ namespace Persistence
         .HasOne( aa => aa.AppUser)
         .WithMany( au => au.Activities)
         .HasForeignKey( aa => aa.AppUserId)
-        .IsRequired();            
+        .IsRequired();      
+
+      //If wanted to configure manually 
+      //We will use automatic EF behavior, so it is unnecessary, as well as AppUser and AppUserId nav props in Photo class
+      // builder.Entity<AppUser>()
+      //   .HasMany( u => u.Photos)
+      //   .WithOne( p => p.AppUser)
+      //   .HasForeignKey( p => p.AppUserId)
+      //   .IsRequired()
+      //   .OnDelete(DeleteBehavior.Restrict);       
+
+      builder.Entity<Photo>()
+        .HasOne( p => p.AppUser)
+        .WithMany( u => u.Photos)
+        .HasForeignKey( p => p.AppUserId)
+        .IsRequired()
+        .OnDelete(DeleteBehavior.Cascade);                   
     }
   }
 }
