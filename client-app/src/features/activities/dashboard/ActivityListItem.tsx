@@ -24,13 +24,13 @@ function AcivityListItem({ activity }: Props) {
         }        
         <Item.Group>
           <Item>
-            <Item.Image size="tiny" circular src="/assets/user.png" style={{marginBottom: "5px"}}/>
+            <Item.Image size="tiny" circular src={ activity.host?.image || "/assets/user.png"} style={{marginBottom: "5px"}}/>
             <Item.Content>
               <Item.Header as={Link} to={`/activities/${activity.id}`}>
                 {activity.title}
               </Item.Header>
               <Item.Description>
-                Hosted by {activity.host?.displayName}
+                Hosted by <Link to={`/profiles/${activity.hostUsername}`}>{activity.host?.displayName}</Link>
               </Item.Description>
               {activity.isHost && (
                 <Item.Description>

@@ -1,3 +1,4 @@
+import { Profile, Photo } from './../models/profile';
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { Activity, ActivityFormValues } from "../models/activity";
@@ -48,7 +49,7 @@ axios.interceptors.response.use( async response => {
       break;  
     case 500:
       store.commonStore.setServerError(data);
-      history.push("server-error");
+      history.push("/server-error");
       break;
   }
   return Promise.reject(error);
@@ -78,7 +79,19 @@ const Account = {
   register: (user: UserFormValues) => requests.post<User,UserFormValues>("/account/register", user)
 };
 
+const Profiles = {
+  get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
+  setMainPhoto: (id: string) => requests.post<void,{}>(`/photos/${id}/setMain`,{}),
+  deletePhoto: (id: string) => requests.del<void>(`/photos/${id}`),
+  uploadPhoto: (file: Blob) => {
+    const formData = new FormData();
+    formData.append("File", file);
+    return axios.post<Photo,AxiosResponse<Photo,FormData>,FormData>("/photos", formData, {
+      headers: {"Content-Type": "multipart/form-data"}
+    }).then( ({data}) => data);
+  }
+};
 
-const agent = { Activities, Account };
+const agent = { Activities, Account, Profiles };
 
 export default agent;
