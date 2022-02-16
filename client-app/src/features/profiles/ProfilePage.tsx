@@ -27,11 +27,6 @@ function ProfilePage() {
       <LoadingComponent content="Loading profile..."></LoadingComponent>
     );    
 
-  // if(!profile)  
-  //    return null; 
-
-  //console.log("ProfilePage rendering", profile?.displayName);
-
   return (
     <Grid>
       <Grid.Column width={16}>
@@ -47,9 +42,3 @@ function ProfilePage() {
 }
 
 export default observer(ProfilePage);
-
-/*
-      <Grid.Column width={12}>
-        <ProfileContent />
-      </Grid.Column>
-*/

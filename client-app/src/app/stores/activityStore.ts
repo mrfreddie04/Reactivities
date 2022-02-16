@@ -4,7 +4,7 @@ import {v4 as uuid} from "uuid";
 import agent from "../api/agent";
 import { format } from 'date-fns';
 import { store } from "./store";
-import { Profile } from '../models/profile';
+import { Photo, Profile } from '../models/profile';
 
 type ActivityGroups = {[key:string]: Activity[]};
 
@@ -47,27 +47,13 @@ export default class ActivityStore {
     try {
       const response = await agent.Activities.list();
 
-      /*
-      this.activityRegistry = new Map(response.map( activity => { 
-        const [dt] = activity.date.split("T");
-        activity.date = dt;
-        return [activity.id,activity];
-        //return {...activity, date: dt};
-      }));
-      */
-
-      /*this.activities = response.map( activity => { 
-        const [dt] = activity.date.split("T");
-        activity.date = dt;        
-        return {...activity, date: dt};
-      });*/
       runInAction(()=>{
         response.forEach( activity => this.setActivity(activity));
         
-        if(this.activityRegistry.size) {
-          const [firstActivity] = this.activitiesByDate;
-          this.selectedActivity = firstActivity;   
-        }        
+        // if(this.activityRegistry.size) {
+        //   const [firstActivity] = this.activitiesByDate;
+        //   this.selectedActivity = firstActivity;   
+        // }        
       });
 
     } catch(err) {
@@ -102,6 +88,10 @@ export default class ActivityStore {
       });  
     }       
   }  
+
+  public clearSelectedActivity = () => {
+    this.selectedActivity = undefined;
+  }
   
   private setLoadingInitial = (state: boolean) => {
     this.loadingInitial = state;
@@ -219,6 +209,25 @@ export default class ActivityStore {
         this.setLoading(false);      
       });  
     }
+  }
+
+  // public updatePhotos = (username: string, photo: Photo) => {
+  //   //this.activityRegistry.values())
+  //   this.activityRegistry.forEach( (activity,key)=>{
+  //     if(activity.hostUsername === username && activity.host) {
+  //       activity.host.image = photo.url;
+  //       if(activity.host.photos)
+  //         this.setMainPhoto(activity.host.photos,photo);
+  //     }  
+
+  //     activity.attendees
+  //       .filter( a => a.username === username && a.photos)  
+  //       .forEach( a => this.setMainPhoto(a.photos!, photo));
+  //   });
+  // }
+
+  private setMainPhoto = (photos: Photo[], photo: Photo) => {
+    photos.forEach( p => p.isMain = (p.id === photo.id));
   }
 
   private getActivity = (id: string) => {

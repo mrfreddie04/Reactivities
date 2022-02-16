@@ -14,28 +14,6 @@ function LoginForm() {
     password: Yup.string().required("Password is required")
   });  
 
-  /*const handleFormSubmit = (creds: Credentials) => {  
-    return login(creds).then( () => {
-      console.log("Logged In");
-    }).catch( (err) => {
-      console.error(err);
-    });
-  };
-  */
-  /*
-  (value) => {
-        return login(value).then( () => {
-          console.log("Logged in");
-        }).catch( (err) => {
-          console.error(err);
-        });
-      }
-  */
-  
-  //const credentials: Credentials = {email:'', password:''};
-
-  //console.log("Render Login");
-
   return(
     <Formik
       initialValues={{email:'', password:'', error: null }}

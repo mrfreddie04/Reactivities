@@ -81,6 +81,7 @@ const Account = {
 
 const Profiles = {
   get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
+  update: (profile: Partial<Profile>) => requests.put<void,Partial<Profile>>("/profiles", profile),
   setMainPhoto: (id: string) => requests.post<void,{}>(`/photos/${id}/setMain`,{}),
   deletePhoto: (id: string) => requests.del<void>(`/photos/${id}`),
   uploadPhoto: (file: Blob) => {

@@ -11,16 +11,19 @@ import ActivityDetailedSidebar from "./ActivityDetailedSidebar";
 
 function AcivityDetails() {
   const { 
-    activityStore: { selectedActivity: activity, loadingInitial, loadActivity}
+    activityStore: { selectedActivity: activity, loadingInitial, loadActivity, clearSelectedActivity}
   } = useStore();
   const { id } = useParams<{id:string}>();
 
   useEffect(()=>{
     if(id) {
-      //console.log("loadActivity");
+      //console.log("loadActivity",id);
       loadActivity(id);
     }
-  },[loadActivity, id]);
+    return () => {
+      clearSelectedActivity();
+    }
+  },[loadActivity, clearSelectedActivity, id]);
 
   if(loadingInitial)
     return (
@@ -37,7 +40,7 @@ function AcivityDetails() {
       <Grid.Column width={10}>
         <ActivityDetailedHeader activity={activity}/>
         <ActivityDetailedInfo activity={activity}/>
-        <ActivityDetailedChat/>
+        <ActivityDetailedChat activityId={activity.id}/>
       </Grid.Column>
       <Grid.Column width={6}>
         <ActivityDetailedSidebar activity={activity} />

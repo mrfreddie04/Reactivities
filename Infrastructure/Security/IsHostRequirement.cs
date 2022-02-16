@@ -36,7 +36,7 @@ namespace Infrastructure.Security
       if(id == null) return Task.CompletedTask;
       var activityId = Guid.Parse(id);
 
-     return _dbContext.ActivityAttendees
+      return _dbContext.ActivityAttendees
         .AsNoTracking()
         .FirstOrDefaultAsync( att => att.AppUserId == userId && att.ActivityId == activityId)
         .ContinueWith( task => {

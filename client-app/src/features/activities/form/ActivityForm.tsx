@@ -15,7 +15,7 @@ import MyDateInput from "../../../app/common/form/MyDateInput";
 
 function AcivityForm() {
   const history = useHistory();
-  const { activityStore: {loadingInitial, loadActivity, createActivity, updateActivity } } = useStore();
+  const { activityStore: {loadingInitial, loadActivity, createActivity, updateActivity, clearSelectedActivity } } = useStore();
   const { id } = useParams<{id:string}>();
 
   const [activity, setActivity] = useState<ActivityFormValues>(new ActivityFormValues());
@@ -38,7 +38,10 @@ function AcivityForm() {
         }  
       });
     }
-  },[id, loadActivity]);
+    return () => {
+      clearSelectedActivity();
+    }    
+  },[id, clearSelectedActivity, loadActivity]);
 
   if(loadingInitial)
     return (
