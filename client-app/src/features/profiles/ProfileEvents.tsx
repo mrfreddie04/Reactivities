@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Grid, Header, Tab } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../../app/stores/store';
@@ -6,6 +6,10 @@ import ProfileEventsList from "./ProfileEventsList";
 
 function ProfileEvents() {
   const { profileStore: {loadEvents}} = useStore();
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   const panes = [
     {

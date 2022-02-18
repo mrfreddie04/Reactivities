@@ -21,10 +21,10 @@ export default class ProfileStore {
     reaction( 
       () => this.activeTab,
       (activeTab) => {
+        // if(activeTab===2) {
+        //   this.loadEvents();
+        // }
         this.followings = [];
-        if(activeTab===2) {
-          this.loadEvents();
-        }
         if(activeTab===3 || activeTab===4) {
           const predicate = activeTab===3 ? "followers" : "following";
           this.loadFollowings(predicate);

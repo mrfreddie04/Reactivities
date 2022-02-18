@@ -7,15 +7,17 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import 'react-datepicker/dist/react-datepicker.min.css';
 //import 'semantic-ui-css/semantic.min.css'; //does not work, used CDN instead
 import './app/layout/styles.css';
-import App from './app/layout/App';
 import reportWebVitals from './reportWebVitals';
 import { store, StoreContext } from "./app/stores/store";
+import App from './app/layout/App';
+import ScrollToTop from './app/layout/ScrollToTop';
 
 export const history = createBrowserHistory(); //creates history object
 
 ReactDOM.render(
   <StoreContext.Provider value={store}>
     <Router history={history}>
+      <ScrollToTop />
       <App />
     </Router>
   </StoreContext.Provider>,

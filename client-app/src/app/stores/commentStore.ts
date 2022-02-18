@@ -3,7 +3,7 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signal
 import { ChatComment } from "../models/comment";
 import { store } from "./store";
 
-const baseUrl = "http://localhost:5000";
+const baseUrl = process.env.REACT_APP_CHAT_URL;
 
 export default class CommentStore {
   public comments: ChatComment[] = [];
@@ -16,8 +16,9 @@ export default class CommentStore {
   public createHubConnection = (activityId: string) => {
     if(store.activityStore.selectedActivity ) {
       //build connection
+      //note! previously used for activityId: store.activityStore.selectedActivity.id
       this.hubConnection = new HubConnectionBuilder()
-        .withUrl(`${baseUrl}/chat?activityId=${store.activityStore.selectedActivity.id}`, {
+        .withUrl(`${baseUrl}?activityId=${activityId}`, {
           accessTokenFactory: () => store.commonStore.token!
         })
         .withAutomaticReconnect()
@@ -26,7 +27,7 @@ export default class CommentStore {
   
       //start connection
       this.hubConnection.start()
-        .then( () => console.log("Hub Connection Started"))
+        //.then( () => console.log("Hub Connection Started"))
         .catch(err => {
           console.log("Error establishing the connection: ", err);
         });
@@ -54,7 +55,7 @@ export default class CommentStore {
   public stopHubConnection = () => {
     if(!this.hubConnection) return;
     this.hubConnection.stop()
-      .then( () => console.log("Hub Connection Stopped"))
+      //.then( () => console.log("Hub Connection Stopped"))
       .catch(err => {
         console.log("Error stopping connection: ", err);
       });
