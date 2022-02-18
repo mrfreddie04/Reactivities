@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 function ProfilePage() {
   const { username } = useParams<{username:string}>();
 
-  const { profileStore: {profile, loadingProfile, loadProfile}} = useStore();
+  const { profileStore: {profile, loadingProfile, loadProfile, setActiveTab}} = useStore();
 
   //console.log("ProfilePage", username);
 
@@ -20,12 +20,17 @@ function ProfilePage() {
       //console.log("ProfilePage loading", username);
       loadProfile(username);
     }
-  },[username, loadProfile]);
+
+    //reset active tab to 0 to reset followings observable back to empty array
+    return () => setActiveTab(0);
+  },[username, loadProfile, setActiveTab]);
 
   if(loadingProfile)
     return (
       <LoadingComponent content="Loading profile..."></LoadingComponent>
     );    
+
+  //console.log("ProfilePage");  
 
   return (
     <Grid>

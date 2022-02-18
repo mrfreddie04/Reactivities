@@ -13,6 +13,7 @@ interface Props {
 function AcivityListItemAttendees({ attendees }: Props) {
 
   //const { activityStore } = useStore();
+  const style = {border: "solid 2px orange"};
 
   return (
     <List horizontal>
@@ -25,6 +26,8 @@ function AcivityListItemAttendees({ attendees }: Props) {
                 <List.Item key={attendee.username} as={Link} to={`/profiles/${attendee.username}`}>
                   <Image 
                     size="mini" 
+                    bordered
+                    style={ attendee.following ? style : null }
                     circular src={attendee.image || '/assets/user.png'}
                   />
                 </List.Item>

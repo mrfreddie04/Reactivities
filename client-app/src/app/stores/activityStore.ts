@@ -1,10 +1,11 @@
 import { Activity, ActivityFormValues } from '../models/activity';
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import {v4 as uuid} from "uuid";
 import agent from "../api/agent";
 import { format } from 'date-fns';
 import { store } from "./store";
 import { Photo, Profile } from '../models/profile';
+import { Pagination, PagingParams } from "../models/pagination";
 
 type ActivityGroups = {[key:string]: Activity[]};
 
@@ -12,12 +13,24 @@ export default class ActivityStore {
   //public activities: Activity[] = [];
   public activityRegistry: Map<string,Activity> = new Map<string,Activity>();
   public selectedActivity: Activity | undefined = undefined;  
+  public pagination: Pagination | null = null;
+  public pagingParams: PagingParams = new PagingParams();
   public editMode: boolean = false;
   public loading: boolean = false;
   public loadingInitial: boolean = false;
+  public predicate = new Map().set("all",true);
 
   constructor() {
     makeAutoObservable(this);
+
+    reaction( 
+      () => this.predicate.keys(),
+      () => {
+        this.pagingParams = new PagingParams(); //reset to start from page one for new filter
+        this.activityRegistry.clear();
+        this.loadActivities(); 
+      }
+    );       
   }
 
   public get activitiesByDate() : Activity[] {
@@ -39,21 +52,30 @@ export default class ActivityStore {
     );
   }
 
+  public get axiosParams() {
+    const params = new URLSearchParams();
+      params.append("pageNumber",String(this.pagingParams.pageNumber));
+      params.append("pageSize",String(this.pagingParams.pageSize));
+      this.predicate.forEach((value,key)=>{
+        if(key === "startDate") {
+          params.append(key,(value as Date).toISOString());  
+        } else {
+          params.append(key,value);
+        }
+      });
+    return params;  
+  }
+
   public loadActivities = async () => {
     if(!this.loadingInitial)
       this.loadingInitial= true;
-    //this.setLoadingInitial(true);
 
     try {
-      const response = await agent.Activities.list();
+      const response = await agent.Activities.list(this.axiosParams);
 
       runInAction(()=>{
-        response.forEach( activity => this.setActivity(activity));
-        
-        // if(this.activityRegistry.size) {
-        //   const [firstActivity] = this.activitiesByDate;
-        //   this.selectedActivity = firstActivity;   
-        // }        
+        response.data.forEach( activity => this.setActivity(activity));      
+        this.setPagination(response.pagination);
       });
 
     } catch(err) {
@@ -211,6 +233,32 @@ export default class ActivityStore {
     }
   }
 
+  public updateAtendeeFollowing = (username: string) => {
+    this.activityRegistry.forEach( (activity)=>{
+      const attendee = activity.attendees.find( a => a.username === username);
+      if(attendee) {
+        attendee.following ? attendee.followersCount-- : attendee.followersCount++;
+        attendee.following = !attendee.following;
+      }
+    });  
+  }
+
+  public setPagingParams = (pagingParams: PagingParams) => {
+    this.pagingParams = pagingParams;
+  }
+
+  public setPredicate = (predicate: string, value: boolean | Date) => {
+    //If not startDate - then delete all non-date keys,as they are mutually exclusive
+    if(predicate !== "startDate") {
+      this.predicate.forEach((value,key) => {
+        if(key !== "startDate" ) this.predicate.delete(key);
+      });
+    }
+    //delete and recreate - for MobX Reactions
+    if(this.predicate.has(predicate)) this.predicate.delete(predicate);
+    this.predicate.set(predicate, value);  
+  }
+
   // public updatePhotos = (username: string, photo: Photo) => {
   //   //this.activityRegistry.values())
   //   this.activityRegistry.forEach( (activity,key)=>{
@@ -242,9 +290,12 @@ export default class ActivityStore {
       activity.host = activity.attendees?.find(attendee => attendee.username === activity.hostUsername );
     }
     activity.date = new Date(activity.date!);
-    this.activityRegistry.set(activity.id, activity);
+    this.activityRegistry.set(activity.id, activity);    
   }  
 
+  private setPagination = (pagination: Pagination) => {
+    this.pagination = pagination;
+  }
 }
 
 

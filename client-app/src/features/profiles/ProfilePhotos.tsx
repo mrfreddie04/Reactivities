@@ -45,7 +45,7 @@ function ProfilePhotos() {
       <Grid>
         <Grid.Column width={16}>
           <Header floated="left" icon="image" content="Photos" />
-          {isCurrentUser && (
+          {isCurrentUser(profile?.username) && (
             <Button floated="right" basic 
               content={addPhotoMode ? "Cancel" : "Add Photo"}
               onClick={() => setAddPhotoMode(!addPhotoMode)}
@@ -60,7 +60,7 @@ function ProfilePhotos() {
                 { photos.map( photo => (
                   <Card key={photo.id}>
                     <Image src={photo.url}/>
-                    {isCurrentUser &&
+                    {isCurrentUser(profile?.username) &&
                       (
                         <Button.Group fluid width={2}>
                           <Button

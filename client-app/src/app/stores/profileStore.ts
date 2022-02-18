@@ -1,23 +1,53 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, reaction  } from "mobx";
 import agent from "../api/agent";
 import { store } from "./store";
 import { Photo, Profile } from "../models/profile";
+import { UserActivity } from "../models/userActivity";
 
 export default class ProfileStore {
   public profile: Profile | null = null;
   public loadingProfile: boolean = false;
   public uploading: boolean = false;
   public loading: boolean = false;
+  public loadingFollowings: boolean = false;
+  public followings: Profile[] = [];
+  public events: UserActivity[] = [];
+  public loadingEvents: boolean = false;
+  public activeTab: number = 0;
 
   constructor() {
     makeAutoObservable(this);
+
+    reaction( 
+      () => this.activeTab,
+      (activeTab) => {
+        this.followings = [];
+        if(activeTab===2) {
+          this.loadEvents();
+        }
+        if(activeTab===3 || activeTab===4) {
+          const predicate = activeTab===3 ? "followers" : "following";
+          this.loadFollowings(predicate);
+        }       
+      }
+    );    
   }
 
-  public get isCurrentUser() {
-    const user = store.userStore.user;
-    if(!this.profile || !user) return false;
-    return this.profile.username === user.username;
+  public setActiveTab = (activeTab: number) => {
+    this.activeTab = activeTab;
   }
+
+  public isCurrentUser = (username: string | undefined) => {
+    const user = store.userStore.user;
+    if(!user || !username) return false;
+    return username === user.username;
+  }
+
+  // public isCurrentUser() {
+  //   const user = store.userStore.user;
+  //   if(!this.profile || !user) return false;
+  //   return this.profile.username === user.username;
+  // }
 
   public loadProfile = async (username: string) => {
     this.setLoadingProfile(true);
@@ -86,6 +116,74 @@ export default class ProfileStore {
     }     
   }    
 
+  public loadFollowings = async (predicate: string ) => {
+    if(!this.profile) return;
+    this.setLoadingFollowings(true);  
+
+    try {
+      const followings = await agent.Profiles.listFollowings(this.profile.username, predicate); 
+      this.setFollowings(followings);
+    } catch(err) {
+      console.log(err);
+    } finally {
+      this.setLoadingFollowings(false);    
+    }    
+  }
+
+  public loadEvents = async (predicate?: string) => {
+    if(!this.profile) return;
+    this.setLoadingEvents(true);  
+
+    try {
+      const events = await agent.Profiles.listEvents(this.profile.username, predicate || ""); 
+      this.setEvents(events);
+    } catch(err) {
+      console.log(err);
+    } finally {
+      this.setLoadingEvents(false);    
+    }    
+  }  
+
+  public updateFollowing = async (username: string, following: boolean) => {    
+    this.setLoading(true);  
+
+    try {
+      await agent.Profiles.updateFollowing(username);
+      store.activityStore.updateAtendeeFollowing(username);    
+      this.setFollowing(username, following);
+    } catch(err) {
+      console.log(err);
+    } finally {
+      this.setLoading(false);    
+    }     
+  }
+
+  private setFollowing = (username: string, following: boolean) => {
+    //when clicking follow/unfollow on user's profile (different than the currently logged user)
+    if(this.profile && this.profile.username === username && !this.isCurrentUser(username)) {
+      following ? this.profile.followersCount++ : this.profile.followersCount--;
+      this.profile.following = following;      
+    }
+    //when currently logged user navigates thru his profile 
+    //via followers/following tab, and clicks on the following button on the card of following.followed user
+    //we need to update stats in the header
+    if(this.profile && this.profile.username !== username && this.isCurrentUser(this.profile.username)) {
+      following ? this.profile.followingCount++ : this.profile.followingCount--;     
+    }    
+    //update the followings observable - it is used to display cards in the followers/following tabs of ProfilePage
+    //this way upon clicking on the follow/unfollow button we willse the number of followers updated (in the card)
+    //and the button label (on the card) as it gets profile object passed down as s property
+    //ProfileFollowings (the parent component of the card) observes followings observable, so when it is updated
+    //ProfileFollowings and its children are rerendered.
+    this.followings.forEach( profile => {    
+      if(profile.username === username) {
+        //console.log(this.profile?.username, profile.username, profile.following, profile.followersCount);
+        profile.following ? profile.followersCount-- : profile.followersCount++;
+        profile.following = !profile.following;
+      }
+    });
+  }
+
   private setPhotoMain = (photo: Photo) => {
     if(this.profile && this.profile.photos) {
       const oldMainPhoto = this.profile.photos.find( p => p.isMain)
@@ -134,9 +232,28 @@ export default class ProfileStore {
     this.loading = state;
   }  
 
+  private setLoadingFollowings = (state: boolean) => {
+    this.loadingFollowings = state;
+  } 
+
+  private setLoadingEvents = (state: boolean) => {
+    this.loadingEvents = state;
+  }   
+
   private setProfile = (profile: Profile) => {
     this.profile = profile;
   }
+
+  private setFollowings = (followings: Profile[]) => {
+    this.followings = followings;
+  }  
+
+  private setEvents = (events: UserActivity[]) => {
+    this.events = events.map( event => {
+      event.date = new Date(event.date);
+      return event;
+    });
+  }    
 
   private setUpdateProfile = (profile: Partial<Profile>) => {
     if(!this.profile) return;

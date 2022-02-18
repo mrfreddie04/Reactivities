@@ -5,6 +5,8 @@ import { Activity, ActivityFormValues } from "../models/activity";
 import { User, UserFormValues } from "../models/user";
 import { history } from "../../index";
 import { store } from "../../app/stores/store";
+import { PaginatedResult } from "../models/pagination";
+import { UserActivity } from "../models/userActivity";
 
 type ValidationErrors = {[key:string]: string};
 
@@ -26,6 +28,13 @@ axios.interceptors.request.use( config => {
 
 axios.interceptors.response.use( async response => {
   await sleep(1000);
+
+  const pagination = response.headers["pagination"];
+  if(pagination) {
+    response.data = new PaginatedResult(response.data, JSON.parse(pagination));
+    return response as AxiosResponse<PaginatedResult<any>>;
+  }
+
   return response;
 }, (error: AxiosError) => {
   const { data, status, config } = error.response!;
@@ -65,7 +74,7 @@ const requests = {
 };
 
 const Activities = {
-  list: () => requests.get<Activity[]>("/activities"),
+  list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>("/activities",{params}).then(responseBody),
   details: (id: string) => requests.get<Activity>(`/activities/${id}`),
   create: (activity: ActivityFormValues) => requests.post<void,ActivityFormValues>("/activities", activity),
   update: (activity: ActivityFormValues) => requests.put<void,ActivityFormValues>(`/activities/${activity.id}`, activity),
@@ -82,6 +91,10 @@ const Account = {
 const Profiles = {
   get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
   update: (profile: Partial<Profile>) => requests.put<void,Partial<Profile>>("/profiles", profile),
+  updateFollowing: (username: string) => requests.post<void,{}>(`/follow/${username}`,{}),
+  listEvents: (username: string, predicate: string) => 
+    requests.get<UserActivity[]>(`/profiles/${username}/activities?predicate=${predicate}`),
+  listFollowings: (username: string, predicate: string) => requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
   setMainPhoto: (id: string) => requests.post<void,{}>(`/photos/${id}/setMain`,{}),
   deletePhoto: (id: string) => requests.del<void>(`/photos/${id}`),
   uploadPhoto: (file: Blob) => {

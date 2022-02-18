@@ -17,7 +17,7 @@ function ProfileAbout() {
       <Grid>
         <Grid.Column width={16}>
           <Header floated="left" icon="user" content={`About ${profile?.displayName}`} />
-          {isCurrentUser && (
+          {isCurrentUser(profile?.username) && (
             <Button 
               floated = "right" 
               basic 
