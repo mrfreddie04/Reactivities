@@ -82,6 +82,7 @@ namespace API
         });
       }
 
+      //Enabled this middleware to switch dev to https (to use FB login)
       app.UseHttpsRedirection();
 
       app.UseRouting();
