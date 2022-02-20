@@ -86,7 +86,8 @@ const Activities = {
 const Account = {
   current: () => requests.get<User>(`/account`),
   login: (user: UserFormValues) => requests.post<User,UserFormValues>("/account/login", user),
-  register: (user: UserFormValues) => requests.post<User,UserFormValues>("/account/register", user)
+  register: (user: UserFormValues) => requests.post<User,UserFormValues>("/account/register", user),
+  fbLogin: (accessToken: string) => requests.post<User,{}>(`/account/fblogin?accessToken=${accessToken}`, {})
 };
 
 const Profiles = {

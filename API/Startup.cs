@@ -56,13 +56,24 @@ namespace API
       app.UseCsp(opt => opt
           .BlockAllMixedContent() //not allowed http with https
           //we are ok with anything generated from our domain (published js files & static content)
-          .StyleSources(s => s.Self()
-            .CustomSources("https://fonts.googleapis.com","https://cdn.jsdelivr.net")) 
-          .FontSources(s => s.Self().CustomSources("https://fonts.gstatic.com","https://cdn.jsdelivr.net","data:"))
+          .StyleSources(s => s.Self().UnsafeInline().CustomSources(
+            "https://fonts.googleapis.com",
+            "https://cdn.jsdelivr.net",
+            "https://connect.facebook.net",
+            "sha256-yChqzBduCCi4o4xdbXRXh4U/t1rP4UUUMJt+rB+ylUI="))
+          .FontSources(s => s.Self().CustomSources(
+            "https://fonts.gstatic.com",
+            "https://cdn.jsdelivr.net","data:"))
           .FormActions(s => s.Self())
           .FrameAncestors(s => s.Self())
-          .ImageSources(s => s.Self().CustomSources("https://res.cloudinary.com","blob:"))
-          .ScriptSources(s => s.Self())
+          .ImageSources(s => s.Self().CustomSources(
+            "https://res.cloudinary.com",
+            "https://www.facebook.com",
+            "blob:",
+            "data:"))
+          .ScriptSources(s => s.Self().CustomSources(
+            "https://connect.facebook.net",
+            "sha256-gzfm6rN3kwFTWuoknkEHIOqsXUqE8Ufs0KZ4ehi9wfM="))
       ); //content security policy
 
       if (env.IsDevelopment())
