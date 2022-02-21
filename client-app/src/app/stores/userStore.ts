@@ -8,6 +8,7 @@ export default class UserStore {
   public user: User | null = null;
   public fbAccessToken: string | null = null;
   public fbLoading: boolean = false;
+  public refreshTokenTimeout: NodeJS.Timeout | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -20,12 +21,16 @@ export default class UserStore {
   public login = async (creds: UserFormValues) => {
     try {
       const user = await agent.Account.login(creds);
-      store.commonStore.setToken(user.token);
-      runInAction(()=>this.user = user);  
+      runInAction(()=>{
+        store.commonStore.setToken(user.token);
+        this.setUser(user);
+        this.startRefreshTokenTimer(user);
+      });  
       history.push("/activities");
       store.modalStore.closeModal();
     } catch(err) {
-      this.user = null;
+      runInAction(()=>this.user = null);  
+      console.log(err);
       throw err;
     }     
   }
@@ -52,7 +57,8 @@ export default class UserStore {
       const user = await agent.Account.register(creds);
       runInAction(() => {
         store.commonStore.setToken(user.token);
-        this.user = user;  
+        this.setUser(user);
+        this.startRefreshTokenTimer(user);
         history.push("/activities");
         store.modalStore.closeModal();
       });  
@@ -82,12 +88,27 @@ export default class UserStore {
       runInAction(()=>{
         store.commonStore.setToken(user.token);
         this.user = user;
+        this.startRefreshTokenTimer(user);
       });  
       history.push("/activities");      
     } catch(err) {
       console.log(err);
     }
   } 
+
+  public refreshToken = async () => {
+    try {
+      //console.log("Refresh Token");
+      const user = await agent.Account.refreshToken();
+      runInAction(()=>{
+        store.commonStore.setToken(user.token);
+        this.setUser(user);
+        this.startRefreshTokenTimer(user);
+      });  
+    } catch(err) {
+      console.log(err);
+    }
+  }
 
   public setImage = (image: string) => {
     if(this.user)
@@ -99,12 +120,29 @@ export default class UserStore {
       this.user.displayName = displayName;
   }
 
+  private startRefreshTokenTimer = (user: User) => {
+    //return;
+    //const payload = JSON.parse(Buffer.from(user.token.split(".")[1],"base64").toString("binary"));
+    const payload = JSON.parse(atob(user.token.split(".")[1]));
+    const expires = new Date(Number(payload.exp) * 1000);
+    //substract 60 sec - to refresh 60 secs brfore expiration
+    const timeOut = expires.getTime() - Date.now() - (60 * 1000); 
+
+    this.stopRefreshTokenTimer();
+    this.refreshTokenTimeout = setTimeout(this.refreshToken, timeOut);
+  } 
+
+  private stopRefreshTokenTimer = () => {
+    if(this.refreshTokenTimeout) clearTimeout(this.refreshTokenTimeout);
+  }   
+
   private apiFbLogin = (accessToken: string) => {
     return agent.Account.fbLogin(accessToken)
       .then((user) => {
         console.log("Connected to API", user.displayName);
         store.commonStore.setToken(user.token);
         this.setUser(user);
+        this.startRefreshTokenTimer(user);
         history.push("/activities");
       });
   }  

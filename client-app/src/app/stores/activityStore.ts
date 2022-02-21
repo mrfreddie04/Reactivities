@@ -72,7 +72,7 @@ export default class ActivityStore {
 
     try {
       const response = await agent.Activities.list(this.axiosParams);
-
+      //console.log("RES",response);
       runInAction(()=>{
         response.data.forEach( activity => this.setActivity(activity));      
         this.setPagination(response.pagination);

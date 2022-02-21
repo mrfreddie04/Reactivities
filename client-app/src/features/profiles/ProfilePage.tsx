@@ -13,11 +13,8 @@ function ProfilePage() {
 
   const { profileStore: {profile, loadingProfile, loadProfile, setActiveTab}} = useStore();
 
-  //console.log("ProfilePage", username);
-
   useEffect(() => {
     if(username) {
-      //console.log("ProfilePage loading", username);
       loadProfile(username);
     }
 
@@ -29,8 +26,6 @@ function ProfilePage() {
     return (
       <LoadingComponent content="Loading profile..."></LoadingComponent>
     );    
-
-  //console.log("ProfilePage");  
 
   return (
     <Grid>

@@ -15,11 +15,11 @@ using Domain;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Controllers
 {
-  [ApiController]
-  [AllowAnonymous]
+  [ApiController]  
   [Route("api/[controller]")]
   public class AccountController : ControllerBase
   {
@@ -46,6 +46,7 @@ namespace API.Controllers
       };
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login([FromBody] LoginDto loginDto) 
     {
@@ -56,14 +57,14 @@ namespace API.Controllers
 
       var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
       
-      if(result.Succeeded)
-      {
-        return Ok(CreateUserObject(user));    
-      }
-  
-      return Unauthorized();
+      if(!result.Succeeded)
+        return Unauthorized();
+      
+      await SetRefreshToken(user);
+      return Ok(CreateUserObject(user));          
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register([FromBody] RegisterDto registerDto)
     {
@@ -90,9 +91,11 @@ namespace API.Controllers
       if(!result.Succeeded)
         return BadRequest("Problem registering user");
 
+      await SetRefreshToken(user);
       return Ok(CreateUserObject(user));    
     }
 
+    [AllowAnonymous]
     [HttpPost("fblogin")]
     public async Task<ActionResult<UserDto>> FacebookLogin([FromQuery] string accessToken) 
     {
@@ -144,19 +147,65 @@ namespace API.Controllers
       if(!result.Succeeded)
         return BadRequest("Problem creating user account");      
 
+      await SetRefreshToken(user);
       return Ok(CreateUserObject(user)); 
-    }    
+    }  
+
+    [Authorize]
+    [HttpPost("refresh-token")]  
+    public async Task<ActionResult<UserDto>> RefreshToken()
+    {
+      var refreshToken = Request.Cookies["refreshToken"];
+      if(refreshToken == null) return Unauthorized("no refresh token");
+
+      var username = User.FindFirstValue(ClaimTypes.Name);
+      var user = await _userManager.Users
+        .Include( t => t.RefreshTokens)
+        .Include( u => u.Photos)
+        .FirstOrDefaultAsync(u => u.UserName == username);
+
+      if(user == null) return Unauthorized("no user");
+
+      //check if refresh token is valid
+      var oldToken = user.RefreshTokens.FirstOrDefault( t => t.Token == refreshToken);
+      if( oldToken == null || !oldToken.IsActive) return Unauthorized("old token invalid");
+
+      var userDto = CreateUserObject(user);
+     
+      return Ok(userDto); 
+    }
 
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUser()    
     {
       //We have access here to User property which is ClaimsPrincipal for the user associated with the executing action
-      //We have acces to claims (Email, Id, UserName)
+      //We have access to claims (Email, Id, UserName)
       var email = User.FindFirstValue(ClaimTypes.Email);
       var user = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Email == email);
 
+      //may want to remove it from here in prod mode
+      await SetRefreshToken(user);
       return Ok(CreateUserObject(user));      
+    }
+
+    private async Task SetRefreshToken(AppUser user)
+    {
+      var refreshToken = _tokenService.GenerateRefreshToken();
+      
+      user.RefreshTokens.Add(refreshToken);
+      await _userManager.UpdateAsync(user);
+
+      var cookieOptions = new CookieOptions()
+      {
+        HttpOnly = true,
+        Expires = DateTime.UtcNow.AddDays(7),
+        IsEssential = true,
+        SameSite = SameSiteMode.None,
+        Secure = true        
+      };
+      
+      Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
     }
 
     private UserDto CreateUserObject(AppUser user)
@@ -165,7 +214,7 @@ namespace API.Controllers
         DisplayName = user.DisplayName,
         Username = user.UserName,
         Token = _tokenService.CreateToken(user),
-        Image = user.Photos.FirstOrDefault( p => p.IsMain)?.Url
+        Image = user.Photos?.FirstOrDefault( p => p.IsMain)?.Url
       };
     }
   }

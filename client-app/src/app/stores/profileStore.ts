@@ -53,6 +53,7 @@ export default class ProfileStore {
     this.setLoadingProfile(true);
 
     try {
+      //console.log(this.profile);
       const profile = await agent.Profiles.get(username);
       this.setProfile(profile);    
     } catch(err) {

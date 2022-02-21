@@ -75,7 +75,12 @@ namespace API.Extensions
         opt.AddPolicy("CorsPolicy", policy =>
         {
           //Switch dev to https (to use FB login)
-          policy.WithOrigins("https://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+          policy
+            .WithOrigins("https://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .WithExposedHeaders("WWW-Authenticate","Pagination");
           //policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
           //policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
         });
