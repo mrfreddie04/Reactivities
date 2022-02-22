@@ -10,6 +10,7 @@ using Application.Interfaces;
 using Infrastructure.Security;
 using Infrastructure.Photos;
 using System;
+using Infrastructure.Email;
 
 namespace API.Extensions
 {
@@ -92,6 +93,7 @@ namespace API.Extensions
 
       services.AddScoped<IUserAccessor, UserAccessor>();
       services.AddScoped<IPhotoAccessor,PhotoAccessor>();
+      services.AddScoped<EmailSender>();
 
       services.AddSignalR();
 

@@ -59,9 +59,10 @@ axios.interceptors.response.use(
         if(headers["www-authenticate"]?.startsWith('Bearer error="invalid_token"')) {
           store.userStore.logout();
           toast.error("Session expired - please login again");
-        } else {
-          toast.error("unauthorized");
-        }
+        } 
+        // else {
+        //   toast.error("unauthorized");
+        // }
         break;
       case 404: 
         history.push("/not-found");
@@ -95,9 +96,13 @@ const Activities = {
 const Account = {
   current: () => requests.get<User>(`/account`),
   login: (user: UserFormValues) => requests.post<User,UserFormValues>("/account/login", user),
-  register: (user: UserFormValues) => requests.post<User,UserFormValues>("/account/register", user),
+  register: (user: UserFormValues) => requests.post<string,UserFormValues>("/account/register", user),
   fbLogin: (accessToken: string) => requests.post<User,{}>(`/account/fblogin?accessToken=${accessToken}`, {}),
-  refreshToken: () => requests.post<User,{}>("/account/refresh-token", {})
+  refreshToken: () => requests.post<User,{}>("/account/refresh-token", {}),
+  verifyEmail: (token: string, email: string) => 
+    requests.post<string,{}>(`/account/verify-email?email=${email}&token=${token}`,{}),
+  ResendEmailConfirm: (email: string) => 
+    requests.get<string>(`/account/resend-email-confirmation-link?email=${email}`)
 };
 
 const Profiles = {

@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '../stores/store';
 
 import NavBar from "./NavBar"
+import PrivateRoute from "./PrivateRoute";
 import HomePage from "../../features/home/HomePage";
 import ActivityDashboard  from '../../features/activities/dashboard/ActivityDashboard';
 import ActivityForm from '../../features/activities/form/ActivityForm';
@@ -16,7 +17,8 @@ import ServerError from '../../features/errors/ServerError';
 import LoadingComponent from './LoadingComponent';
 import ModalContainer from "../common/modals/ModalContainer";
 import ProfilePage from "../../features/profiles/ProfilePage";
-import PrivateRoute from "./PrivateRoute";
+import RegisterSuccess from "../../features/users/RegisterSuccess";
+import ConfirmEmail from "../../features/users/ConfirmEmail";
 
 function App() {
   const location = useLocation();
@@ -49,6 +51,8 @@ function App() {
                 <PrivateRoute key={location.key} path={["/create-activity","/manage-activity/:id"]} exact component={ActivityForm} />
                 <PrivateRoute path="/profiles/:username" exact component={ProfilePage} />
                 <PrivateRoute path="/errors" exact component={TestErrors} />
+                <Route path="/account/register-success" exact component={RegisterSuccess}/>
+                <Route path="/account/verify-email" exact component={ConfirmEmail}/>
                 <Route path="/server-error" exact component={ServerError} />
                 <Route component={NotFound}/>
               </Switch>

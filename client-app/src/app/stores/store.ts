@@ -27,7 +27,7 @@ export const store: Store = {
 //add MobX stores to the context - to be used as the provider
 export const StoreContext = createContext(store);
 
-// create a methos to retrive data from the context
+// create a method to retrive data from the context
 export function useStore() {
   return useContext(StoreContext);
 }

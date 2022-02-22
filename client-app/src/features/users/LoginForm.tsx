@@ -19,10 +19,10 @@ function LoginForm() {
       initialValues={{email:'', password:'', error: null }}
       validationSchema={validationSchema}
       onSubmit={(value, {setErrors}) => {
-        return login(value).catch(error =>setErrors({ error:"Invalid email or password"}) );
+        return login(value).catch(error => setErrors({ error: error.response.data }) );
       }}
     >
-      {({handleSubmit, isSubmitting, dirty }) => { 
+      {({handleSubmit, isSubmitting, dirty, errors }) => { 
         return (
         <Form className="ui form" onSubmit={handleSubmit} autoComplete="off" > 
           <Header as="h2" content="Login to Reactivities" color="teal" textAlign="center" />
@@ -31,8 +31,8 @@ function LoginForm() {
           <ErrorMessage 
             name="error"
             render={
-              (error) => 
-                <Label basic color="red" content={error} style={{marginBottom:"10px"}}/>
+              () => 
+                <Label basic color="red" content={errors.error} style={{marginBottom:"10px"}}/>
             }
           />
           <Button 

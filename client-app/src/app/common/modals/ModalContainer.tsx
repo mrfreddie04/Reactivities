@@ -3,7 +3,7 @@ import { Modal } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../../stores/store';
 
-function ModalComponent() {
+function ModalContainer() {
   const { modalStore: { modal, closeModal } } = useStore();
 
   if(!modal.open)
@@ -18,4 +18,4 @@ function ModalComponent() {
   );
 }
 
-export default observer(ModalComponent);
+export default observer(ModalContainer);

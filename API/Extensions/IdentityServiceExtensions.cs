@@ -21,9 +21,11 @@ namespace API.Extensions
       services.AddIdentityCore<AppUser>( opt => {
         //for example we can suppress certain elements of complex pwd policy
         opt.Password.RequireNonAlphanumeric = false;
+        opt.SignIn.RequireConfirmedEmail = true;
       })
       .AddEntityFrameworkStores<DataContext>()
-      .AddSignInManager<SignInManager<AppUser>>();
+      .AddSignInManager<SignInManager<AppUser>>()
+      .AddDefaultTokenProviders();
 
       //"super secret key"
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));

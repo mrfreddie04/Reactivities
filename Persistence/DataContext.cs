@@ -54,6 +54,13 @@ namespace Persistence
         .IsRequired()
         .OnDelete(DeleteBehavior.Cascade);        
 
+      builder.Entity<RefreshToken>()
+        .HasOne( t => t.AppUser)
+        .WithMany( u => u.RefreshTokens)
+        //.HasForeignKey( t => t.AppUser.Id)
+        .IsRequired()
+        .OnDelete(DeleteBehavior.Cascade);                
+
       builder.Entity<Comment>()
         .HasOne( c => c.Activity)
         .WithMany( a => a.Comments)
